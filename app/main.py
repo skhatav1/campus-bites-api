@@ -33,5 +33,5 @@ def _seed_meals() -> None:
         )
         session.commit()
 
-app.include_router(system.router)
-app.include_router(meals.router)
+app.include_router(system.router, prefix="/api/v1")
+app.include_router(meals.router, prefix="/api/v1")

@@ -25,3 +25,9 @@ class MealCreate(BaseModel):
 class MealUpdate(BaseModel):
     name: str | None = None
     price: float | None = None
+
+
+class MealOut(BaseModel):
+    id: int
+    name: str
+    price: float

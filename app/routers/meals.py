@@ -5,21 +5,21 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db import get_db
-from app.models import Meal, MealCreate, MealUpdate
+from app.models import Meal, MealCreate, MealOut, MealUpdate
 
-router = APIRouter()
+router = APIRouter(prefix="/meals", tags=["meals"])
 
 def _meal_to_dict(meal: Meal) -> dict:
     return {"id": meal.id, "name": meal.name, "price": meal.price}
 
 
-@router.get("/meals")
+@router.get("/", response_model=list[MealOut])
 def get_meals(db: Session = Depends(get_db)) -> list[dict]:
     meals = db.execute(select(Meal)).scalars().all()
     return [_meal_to_dict(meal) for meal in meals]
 
 
-@router.post("/meals")
+@router.post("/", response_model=MealOut)
 def create_meal(meal: MealCreate, db: Session = Depends(get_db)) -> dict:
     new_meal = Meal(name=meal.name, price=meal.price)
     db.add(new_meal)
@@ -28,7 +28,7 @@ def create_meal(meal: MealCreate, db: Session = Depends(get_db)) -> dict:
     return _meal_to_dict(new_meal)
 
 
-@router.get("/meals/{meal_id}")
+@router.get("/{meal_id}", response_model=MealOut)
 def get_meal(meal_id: int, db: Session = Depends(get_db)) -> dict:
     meal = db.get(Meal, meal_id)
     if meal is None:
@@ -36,7 +36,7 @@ def get_meal(meal_id: int, db: Session = Depends(get_db)) -> dict:
     return _meal_to_dict(meal)
 
 
-@router.put("/meals/{meal_id}")
+@router.put("/{meal_id}", response_model=MealOut)
 def update_meal(
     meal_id: int,
     payload: MealUpdate,
@@ -54,7 +54,7 @@ def update_meal(
     return _meal_to_dict(meal)
 
 
-@router.delete("/meals/{meal_id}")
+@router.delete("/{meal_id}")
 def delete_meal(meal_id: int, db: Session = Depends(get_db)) -> dict:
     meal = db.get(Meal, meal_id)
     if meal is None:
