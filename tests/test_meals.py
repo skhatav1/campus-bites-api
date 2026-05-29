@@ -10,7 +10,7 @@ def test_seeded_meals_exist(client):
 def test_create_meal(client):
     payload = {"name": "Test Meal", "price": 5.55}
     r = client.post("/api/v1/meals", json=payload)
-    assert r.status_code == 200
+    assert r.status_code == 201
     data = r.json()
     assert "id" in data
     assert data["name"] == "Test Meal"
@@ -42,10 +42,29 @@ def test_delete_meal(client):
     meal_id = created["id"]
 
     r = client.delete(f"/api/v1/meals/{meal_id}")
-    assert r.status_code == 200
-    assert r.json() == {"message": "Meal deleted"}
+    assert r.status_code == 204
+    assert r.content == b""
 
     # confirm it is gone
     r2 = client.get(f"/api/v1/meals/{meal_id}")
     assert r2.status_code == 404
     assert r2.json()["detail"] == "Meal not found"
+
+
+def test_create_meal_rejects_invalid_payload(client):
+    r = client.post("/api/v1/meals", json={"name": "", "price": 0})
+    assert r.status_code == 422
+
+
+def test_update_meal_rejects_invalid_payload(client):
+    created = client.post("/api/v1/meals", json={"name": "Valid", "price": 3.33}).json()
+    meal_id = created["id"]
+
+    r = client.put(f"/api/v1/meals/{meal_id}", json={"price": -1})
+    assert r.status_code == 422
+
+
+def test_missing_meal_returns_404(client):
+    r = client.get("/api/v1/meals/999")
+    assert r.status_code == 404
+    assert r.json()["detail"] == "Meal not found"

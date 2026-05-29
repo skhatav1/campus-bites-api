@@ -1,10 +1,13 @@
 # Campus Bites API
 
-Campus Bites API is a simple CRUD API for meals. It is built with FastAPI and uses an in-memory list to store meals so you can learn and test API basics quickly.
+Campus Bites API is a small CRUD API for campus meal listings. It is built with FastAPI, SQLAlchemy, SQLite, and Alembic migrations.
 
 ## Tech stack
 - FastAPI
 - Pydantic
+- SQLAlchemy
+- SQLite
+- Alembic
 - Uvicorn
 
 ## Setup
@@ -25,6 +28,20 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
+Optional environment variables can be copied from `.env.example`:
+```bash
+cp .env.example .env
+```
+
+By default the API uses `sqlite:///./campus_bites.db`.
+
+## Run database migrations
+```bash
+alembic upgrade head
+```
+
+The app also creates missing tables on startup for local development.
+
 ## Run the API
 ```bash
 uvicorn app.main:app --reload
@@ -33,27 +50,37 @@ uvicorn app.main:app --reload
 ## Swagger UI
 Open `http://127.0.0.1:8000/docs` in your browser to view and test the API.
 
+## Health check
+```bash
+curl http://127.0.0.1:8000/api/v1/health
+```
+
+## Run tests
+```bash
+python -m pytest
+```
+
 ## Example requests
 Get all meals:
 ```bash
-curl http://127.0.0.1:8000/meals
+curl http://127.0.0.1:8000/api/v1/meals/
 ```
 
 Create a meal:
 ```bash
-curl -X POST http://127.0.0.1:8000/meals \
+curl -X POST http://127.0.0.1:8000/api/v1/meals/ \
   -H "Content-Type: application/json" \
   -d '{"name": "Campus Burger", "price": 8.99}'
 ```
 
 Update a meal:
 ```bash
-curl -X PUT http://127.0.0.1:8000/meals/1 \
+curl -X PUT http://127.0.0.1:8000/api/v1/meals/1 \
   -H "Content-Type: application/json" \
   -d '{"name": "Updated Burger", "price": 9.49}'
 ```
 
 Delete a meal:
 ```bash
-curl -X DELETE http://127.0.0.1:8000/meals/1
+curl -X DELETE http://127.0.0.1:8000/api/v1/meals/1
 ```
