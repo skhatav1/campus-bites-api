@@ -50,6 +50,24 @@ uvicorn app.main:app --reload
 ## Swagger UI
 Open `http://127.0.0.1:8000/docs` in your browser to view and test the API.
 
+## Frontend
+This repo includes a static frontend in `frontend/`.
+
+Start the API:
+```bash
+.venv/bin/uvicorn app.main:app --reload
+```
+
+In a second terminal, serve the frontend:
+```bash
+cd frontend
+python3 -m http.server 3000
+```
+
+Open `http://127.0.0.1:3000`.
+
+For deployment, update `frontend/config.js` so `apiBaseUrl` points to the public backend URL.
+
 ## Health check
 ```bash
 curl http://127.0.0.1:8000/api/v1/health

@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Campus Bites meal discovery dashboard for browsing and managing campus dining options."
+    />
+    <title>Campus Bites</title>
+    <link rel="preload" href="./assets/campus-dining-hero.png" as="image" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar" aria-label="Application header">
+        <a class="brand" href="./index.html" aria-label="Campus Bites home">
+          <span class="brand-mark" aria-hidden="true">CB</span>
+          <span>
+            <strong>Campus Bites</strong>
+            <small>Dining dashboard</small>
+          </span>
+        </a>
+
+        <div class="topbar-actions">
+          <span class="status-pill" id="apiStatus" aria-live="polite">
+            <span class="status-dot"></span>
+            Checking API
+          </span>
+          <button class="icon-button" id="refreshButton" type="button" title="Refresh meals" aria-label="Refresh meals">
+            ↻
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero" aria-labelledby="heroTitle">
+          <div class="hero-copy">
+            <p class="eyebrow">Fast campus dining ops</p>
+            <h1 id="heroTitle">Meals, prices, and updates in one clean view.</h1>
+            <p>
+              Browse the current campus menu, add new meals, adjust prices, and keep the API data ready for students.
+            </p>
+            <div class="hero-actions">
+              <a class="primary-action" href="#mealForm">Add meal</a>
+              <a class="secondary-action" href="#menuGrid">View menu</a>
+            </div>
+          </div>
+          <div class="hero-image" role="img" aria-label="Campus cafe table with meals and drinks"></div>
+        </section>
+
+        <section class="metrics" aria-label="Menu summary">
+          <article>
+            <span id="mealCount">0</span>
+            <p>Meals listed</p>
+          </article>
+          <article>
+            <span id="averagePrice">$0.00</span>
+            <p>Average price</p>
+          </article>
+          <article>
+            <span id="lowestPrice">$0.00</span>
+            <p>Lowest price</p>
+          </article>
+        </section>
+
+        <section class="workspace">
+          <aside class="panel controls-panel" aria-labelledby="controlsTitle">
+            <div class="section-heading">
+              <p class="eyebrow">Manage</p>
+              <h2 id="controlsTitle">Meal editor</h2>
+            </div>
+
+            <form id="mealForm">
+              <input type="hidden" id="mealId" />
+
+              <label for="mealName">
+                Meal name
+                <input id="mealName" name="name" type="text" maxlength="120" placeholder="Garden Wrap" required />
+              </label>
+
+              <label for="mealPrice">
+                Price
+                <input id="mealPrice" name="price" type="number" min="0.01" step="0.01" placeholder="7.49" required />
+              </label>
+
+              <div class="form-actions">
+                <button class="primary-button" id="submitButton" type="submit">Add meal</button>
+                <button class="ghost-button" id="cancelEditButton" type="button" hidden>Cancel</button>
+              </div>
+            </form>
+
+            <div class="api-panel">
+              <label for="apiBaseUrl">
+                API base URL
+                <input id="apiBaseUrl" type="url" spellcheck="false" />
+              </label>
+              <button class="ghost-button" id="saveApiButton" type="button">Save API URL</button>
+            </div>
+          </aside>
+
+          <section class="menu-panel" aria-labelledby="menuTitle">
+            <div class="menu-toolbar">
+              <div class="section-heading">
+                <p class="eyebrow">Live menu</p>
+                <h2 id="menuTitle">Campus meals</h2>
+              </div>
+
+              <div class="toolbar-fields">
+                <label class="search-field" for="searchInput">
+                  <span aria-hidden="true">⌕</span>
+                  <input id="searchInput" type="search" placeholder="Search meals" autocomplete="off" />
+                </label>
+                <label class="select-field" for="sortSelect">
+                  <select id="sortSelect">
+                    <option value="name-asc">Name A-Z</option>
+                    <option value="price-asc">Price low-high</option>
+                    <option value="price-desc">Price high-low</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            <div class="alert" id="messageBox" role="status" aria-live="polite" hidden></div>
+            <div class="menu-grid" id="menuGrid" aria-live="polite"></div>
+            <div class="empty-state" id="emptyState" hidden>
+              <h3>No meals found</h3>
+              <p>Try a different search or add a new meal from the editor.</p>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <template id="mealCardTemplate">
+      <article class="meal-card">
+        <div class="meal-card-top">
+          <span class="meal-badge">Campus pick</span>
+          <strong class="meal-price"></strong>
+        </div>
+        <h3 class="meal-name"></h3>
+        <p class="meal-note"></p>
+        <div class="meal-actions">
+          <button class="ghost-button edit-button" type="button">Edit</button>
+          <button class="danger-button delete-button" type="button">Delete</button>
+        </div>
+      </article>
+    </template>
+
+    <script src="./config.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
