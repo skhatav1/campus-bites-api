@@ -68,6 +68,9 @@ Open `http://127.0.0.1:3000`.
 
 For deployment, update `frontend/config.js` so `apiBaseUrl` points to the public backend URL.
 
+## Deployment
+Backend deployment notes are in `DEPLOYMENT.md`. The repo includes `render.yaml` for Render.
+
 ## Health check
 ```bash
 curl http://127.0.0.1:8000/api/v1/health
