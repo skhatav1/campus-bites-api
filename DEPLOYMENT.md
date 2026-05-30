@@ -50,3 +50,9 @@ Then test the meals endpoint:
 ```text
 https://your-render-service.onrender.com/api/v1/meals/
 ```
+
+Current Render backend:
+
+```text
+https://campus-bites-api-o554.onrender.com
+```

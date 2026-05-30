@@ -27,8 +27,8 @@ The default API URL is set in `config.js`:
 
 ```js
 window.CAMPUS_BITES_CONFIG = {
-  apiBaseUrl: "http://127.0.0.1:8000",
+  apiBaseUrl: "https://campus-bites-api-o554.onrender.com",
 };
 ```
 
-For deployment, change `apiBaseUrl` to the public backend URL.
+For local-only development, you can temporarily change `apiBaseUrl` to `http://127.0.0.1:8000` or use Admin tools in the UI to save a local API URL in your browser.
