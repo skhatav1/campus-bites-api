@@ -26,7 +26,7 @@ CORS_ORIGINS=["http://localhost:3000","http://127.0.0.1:3000"]
 After the Vercel frontend is deployed, update `CORS_ORIGINS` to include the Vercel URL:
 
 ```text
-CORS_ORIGINS=["https://your-vercel-site.vercel.app"]
+CORS_ORIGINS=["http://localhost:3000","http://127.0.0.1:3000","https://campus-bites-api.vercel.app"]
 ```
 
 For a more durable production setup, replace SQLite with a hosted PostgreSQL database and set `DATABASE_URL` to the PostgreSQL connection string.
