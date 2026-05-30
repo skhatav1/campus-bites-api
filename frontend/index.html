@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Campus Bites meal discovery dashboard for browsing and managing campus dining options."
+      content="Campus Bites helps students find affordable campus meals between classes."
     />
     <title>Campus Bites</title>
     <link rel="preload" href="./assets/campus-dining-hero.png" as="image" />
@@ -18,11 +18,13 @@
           <span class="brand-mark" aria-hidden="true">CB</span>
           <span>
             <strong>Campus Bites</strong>
-            <small>Dining dashboard</small>
+            <small>Student dining guide</small>
           </span>
         </a>
 
         <div class="topbar-actions">
+          <a class="nav-link" href="#menuGrid">Menu</a>
+          <a class="nav-link" href="#mealPlan">My picks</a>
           <span class="status-pill" id="apiStatus" aria-live="polite">
             <span class="status-dot"></span>
             Checking API
@@ -36,14 +38,14 @@
       <main>
         <section class="hero" aria-labelledby="heroTitle">
           <div class="hero-copy">
-            <p class="eyebrow">Fast campus dining ops</p>
-            <h1 id="heroTitle">Meals, prices, and updates in one clean view.</h1>
+            <p class="eyebrow">Campus food without the guesswork</p>
+            <h1 id="heroTitle">Find a meal that fits your break and your budget.</h1>
             <p>
-              Browse the current campus menu, add new meals, adjust prices, and keep the API data ready for students.
+              Search the current campus menu, compare prices, save favorites, and build a quick meal plan before you leave class.
             </p>
             <div class="hero-actions">
-              <a class="primary-action" href="#mealForm">Add meal</a>
-              <a class="secondary-action" href="#menuGrid">View menu</a>
+              <a class="primary-action" href="#menuGrid">Browse meals</a>
+              <a class="secondary-action" href="#mealPlan">View picks</a>
             </div>
           </div>
           <div class="hero-image" role="img" aria-label="Campus cafe table with meals and drinks"></div>
@@ -52,58 +54,24 @@
         <section class="metrics" aria-label="Menu summary">
           <article>
             <span id="mealCount">0</span>
-            <p>Meals listed</p>
+            <p>Options today</p>
           </article>
           <article>
             <span id="averagePrice">$0.00</span>
-            <p>Average price</p>
+            <p>Typical spend</p>
           </article>
           <article>
             <span id="lowestPrice">$0.00</span>
-            <p>Lowest price</p>
+            <p>Best budget pick</p>
           </article>
         </section>
 
         <section class="workspace">
-          <aside class="panel controls-panel" aria-labelledby="controlsTitle">
-            <div class="section-heading">
-              <p class="eyebrow">Manage</p>
-              <h2 id="controlsTitle">Meal editor</h2>
-            </div>
-
-            <form id="mealForm">
-              <input type="hidden" id="mealId" />
-
-              <label for="mealName">
-                Meal name
-                <input id="mealName" name="name" type="text" maxlength="120" placeholder="Garden Wrap" required />
-              </label>
-
-              <label for="mealPrice">
-                Price
-                <input id="mealPrice" name="price" type="number" min="0.01" step="0.01" placeholder="7.49" required />
-              </label>
-
-              <div class="form-actions">
-                <button class="primary-button" id="submitButton" type="submit">Add meal</button>
-                <button class="ghost-button" id="cancelEditButton" type="button" hidden>Cancel</button>
-              </div>
-            </form>
-
-            <div class="api-panel">
-              <label for="apiBaseUrl">
-                API base URL
-                <input id="apiBaseUrl" type="url" spellcheck="false" />
-              </label>
-              <button class="ghost-button" id="saveApiButton" type="button">Save API URL</button>
-            </div>
-          </aside>
-
           <section class="menu-panel" aria-labelledby="menuTitle">
             <div class="menu-toolbar">
               <div class="section-heading">
-                <p class="eyebrow">Live menu</p>
-                <h2 id="menuTitle">Campus meals</h2>
+                <p class="eyebrow">Student menu</p>
+                <h2 id="menuTitle">What sounds good?</h2>
               </div>
 
               <div class="toolbar-fields">
@@ -113,34 +81,104 @@
                 </label>
                 <label class="select-field" for="sortSelect">
                   <select id="sortSelect">
-                    <option value="name-asc">Name A-Z</option>
+                    <option value="recommended">Recommended</option>
                     <option value="price-asc">Price low-high</option>
                     <option value="price-desc">Price high-low</option>
+                    <option value="name-asc">Name A-Z</option>
                   </select>
                 </label>
               </div>
+            </div>
+
+            <div class="filter-chips" aria-label="Meal filters">
+              <button class="chip active" type="button" data-filter="all">All</button>
+              <button class="chip" type="button" data-filter="budget">Under $8</button>
+              <button class="chip" type="button" data-filter="quick">Quick bite</button>
+              <button class="chip" type="button" data-filter="hearty">Hearty</button>
+              <button class="chip" type="button" data-filter="favorites">Favorites</button>
             </div>
 
             <div class="alert" id="messageBox" role="status" aria-live="polite" hidden></div>
             <div class="menu-grid" id="menuGrid" aria-live="polite"></div>
             <div class="empty-state" id="emptyState" hidden>
               <h3>No meals found</h3>
-              <p>Try a different search or add a new meal from the editor.</p>
+              <p>Try a different search, adjust the filters, or check back after the menu is updated.</p>
             </div>
           </section>
+
+          <aside class="panel plan-panel" id="mealPlan" aria-labelledby="planTitle">
+            <div class="section-heading">
+              <p class="eyebrow">My picks</p>
+              <h2 id="planTitle">Meal plan</h2>
+            </div>
+            <div class="plan-list" id="planList"></div>
+            <div class="plan-total">
+              <span>Total</span>
+              <strong id="planTotal">$0.00</strong>
+            </div>
+            <button class="ghost-button" id="clearPlanButton" type="button">Clear picks</button>
+          </aside>
         </section>
+
+        <details class="admin-tools">
+          <summary>Admin tools</summary>
+          <div class="admin-grid">
+            <section class="panel controls-panel" aria-labelledby="controlsTitle">
+              <div class="section-heading">
+                <p class="eyebrow">Manage menu</p>
+                <h2 id="controlsTitle">Meal editor</h2>
+              </div>
+
+              <form id="mealForm">
+                <input type="hidden" id="mealId" />
+
+                <label for="mealName">
+                  Meal name
+                  <input id="mealName" name="name" type="text" maxlength="120" placeholder="Garden Wrap" required />
+                </label>
+
+                <label for="mealPrice">
+                  Price
+                  <input id="mealPrice" name="price" type="number" min="0.01" step="0.01" placeholder="7.49" required />
+                </label>
+
+                <div class="form-actions">
+                  <button class="primary-button" id="submitButton" type="submit">Add meal</button>
+                  <button class="ghost-button" id="cancelEditButton" type="button" hidden>Cancel</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="panel api-panel" aria-labelledby="apiTitle">
+              <div class="section-heading">
+                <p class="eyebrow">Developer</p>
+                <h2 id="apiTitle">API connection</h2>
+              </div>
+              <label for="apiBaseUrl">
+                API base URL
+                <input id="apiBaseUrl" type="url" spellcheck="false" />
+              </label>
+              <button class="ghost-button" id="saveApiButton" type="button">Save API URL</button>
+            </section>
+          </div>
+        </details>
       </main>
     </div>
 
     <template id="mealCardTemplate">
       <article class="meal-card">
         <div class="meal-card-top">
-          <span class="meal-badge">Campus pick</span>
+          <span class="meal-badge"></span>
           <strong class="meal-price"></strong>
         </div>
         <h3 class="meal-name"></h3>
         <p class="meal-note"></p>
+        <div class="meal-tags"></div>
         <div class="meal-actions">
+          <button class="primary-button add-plan-button" type="button">Add to picks</button>
+          <button class="icon-button favorite-button" type="button" title="Save favorite" aria-label="Save favorite">♡</button>
+        </div>
+        <div class="admin-card-actions">
           <button class="ghost-button edit-button" type="button">Edit</button>
           <button class="danger-button delete-button" type="button">Delete</button>
         </div>

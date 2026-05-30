@@ -1,6 +1,8 @@
 # Campus Bites Frontend
 
-Static frontend for the Campus Bites FastAPI backend.
+Static student-facing frontend for the Campus Bites FastAPI backend.
+
+The default screen is a meal discovery experience with search, filters, favorites, and a local meal plan. Menu management lives under the collapsed Admin tools section.
 
 ## Run locally
 

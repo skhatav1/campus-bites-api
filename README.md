@@ -51,7 +51,7 @@ uvicorn app.main:app --reload
 Open `http://127.0.0.1:8000/docs` in your browser to view and test the API.
 
 ## Frontend
-This repo includes a static frontend in `frontend/`.
+This repo includes a static student-facing frontend in `frontend/`. It supports meal discovery, search, filters, favorites, a local meal plan, and a collapsed admin section for menu updates.
 
 Start the API:
 ```bash
