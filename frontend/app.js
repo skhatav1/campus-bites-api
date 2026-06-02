@@ -1,8 +1,9 @@
 const config = window.CAMPUS_BITES_CONFIG || {};
+const defaultApiUrl = normalizeBaseUrl(config.apiBaseUrl || "http://127.0.0.1:8000");
 const storedApiUrl = localStorage.getItem("campus-bites-api-url");
 
 const state = {
-  apiBaseUrl: normalizeBaseUrl(storedApiUrl || config.apiBaseUrl || "http://127.0.0.1:8000"),
+  apiBaseUrl: normalizeBaseUrl(storedApiUrl || defaultApiUrl),
   meals: [],
   query: "",
   sort: "recommended",
@@ -25,6 +26,7 @@ const elements = {
   cancelEditButton: document.querySelector("#cancelEditButton"),
   apiBaseUrl: document.querySelector("#apiBaseUrl"),
   saveApiButton: document.querySelector("#saveApiButton"),
+  resetApiButton: document.querySelector("#resetApiButton"),
   searchInput: document.querySelector("#searchInput"),
   sortSelect: document.querySelector("#sortSelect"),
   filterButtons: document.querySelectorAll("[data-filter]"),
@@ -62,6 +64,10 @@ elements.saveApiButton.addEventListener("click", () => {
   localStorage.setItem("campus-bites-api-url", state.apiBaseUrl);
   loadMeals();
 });
+elements.resetApiButton.addEventListener("click", () => {
+  useDefaultApiUrl();
+  loadMeals();
+});
 elements.cancelEditButton.addEventListener("click", resetForm);
 elements.adminTools.addEventListener("toggle", () => {
   document.body.classList.toggle("admin-mode", elements.adminTools.open);
@@ -75,7 +81,7 @@ elements.mealForm.addEventListener("submit", submitMeal);
 
 loadMeals();
 
-async function loadMeals() {
+async function loadMeals(allowSavedUrlFallback = true) {
   setStatus("Checking API", "pending");
   hideMessage();
 
@@ -91,10 +97,16 @@ async function loadMeals() {
     setStatus("API connected", "online");
     render();
   } catch (error) {
+    if (allowSavedUrlFallback && hasSavedApiOverride()) {
+      useDefaultApiUrl();
+      showMessage("Saved API URL failed, so Campus Bites switched back to the deployed API.");
+      return loadMeals(false);
+    }
+
     state.meals = [];
     setStatus("API offline", "offline");
     render();
-    showMessage(`Could not load meals from ${state.apiBaseUrl}. Start the FastAPI backend or update the API URL.`, "error");
+    showMessage(`Could not load meals from ${state.apiBaseUrl}. Open Admin tools to reset the API URL or check the backend.`, "error");
   }
 }
 
@@ -355,6 +367,16 @@ function apiPath(path) {
 
 function normalizeBaseUrl(url) {
   return String(url || "").trim().replace(/\/+$/, "");
+}
+
+function hasSavedApiOverride() {
+  return Boolean(localStorage.getItem("campus-bites-api-url")) && state.apiBaseUrl !== defaultApiUrl;
+}
+
+function useDefaultApiUrl() {
+  state.apiBaseUrl = defaultApiUrl;
+  elements.apiBaseUrl.value = defaultApiUrl;
+  localStorage.removeItem("campus-bites-api-url");
 }
 
 function readStoredIds(key) {
