@@ -4,13 +4,18 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    startCommand: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /api/v1/health
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.12
       - key: DATABASE_URL
-        value: sqlite:///./campus_bites.db
+        sync: false   # set to your Render PostgreSQL internal URL
       - key: CORS_ORIGINS
-        sync: false   # set this in the Render dashboard; example below
-        # '["https://your-frontend.vercel.app","http://localhost:3000"]'
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
