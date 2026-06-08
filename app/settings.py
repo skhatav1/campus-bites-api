@@ -13,6 +13,12 @@ class Settings(BaseSettings):
         ]
     )
 
+    # Auth
+    SECRET_KEY: str = "change-me-in-production-use-a-long-random-string"
+    ADMIN_USERNAME: str = "admin"
+    ADMIN_PASSWORD: str = "campusbites123"
+    ACCESS_TOKEN_EXPIRE_HOURS: int = 8
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 

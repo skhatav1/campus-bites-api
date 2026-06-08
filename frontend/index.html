@@ -132,7 +132,10 @@
         </section>
 
         <details class="admin-tools">
-          <summary>Admin tools</summary>
+          <summary>
+            <span class="admin-summary-label">Admin tools</span>
+            <span class="admin-logged-in-badge" id="adminBadge" hidden>Logged in</span>
+          </summary>
           <div class="admin-grid">
             <section class="panel controls-panel" aria-labelledby="controlsTitle">
               <div class="section-heading">
@@ -168,6 +171,7 @@
                 <div class="form-actions">
                   <button class="primary-button" id="submitButton" type="submit">Add meal</button>
                   <button class="ghost-button" id="cancelEditButton" type="button" hidden>Cancel</button>
+                  <button class="ghost-button danger-text" id="logoutButton" type="button">Log out</button>
                 </div>
               </form>
             </section>
@@ -189,6 +193,29 @@
           </div>
         </details>
       </main>
+    </div>
+
+    <!-- Login modal -->
+    <div class="confirm-overlay" id="loginOverlay" role="dialog" aria-modal="true" aria-labelledby="loginTitle" hidden>
+      <div class="confirm-dialog">
+        <h3 id="loginTitle" class="confirm-title">Admin login</h3>
+        <p class="confirm-body">Enter your credentials to manage the menu.</p>
+        <form id="loginForm" novalidate>
+          <label for="loginUsername">
+            Username
+            <input id="loginUsername" type="text" autocomplete="username" placeholder="admin" required />
+          </label>
+          <label for="loginPassword" style="margin-top:12px">
+            Password
+            <input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••" required />
+          </label>
+          <span class="field-error" id="loginError" aria-live="polite" style="margin-top:6px;display:block"></span>
+          <div class="confirm-actions" style="margin-top:20px">
+            <button class="ghost-button" id="loginCancel" type="button">Cancel</button>
+            <button class="primary-button" id="loginSubmit" type="submit">Log in</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Confirm dialog -->

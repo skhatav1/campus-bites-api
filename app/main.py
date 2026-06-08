@@ -10,7 +10,7 @@ from sqlalchemy import select
 
 from app.db import SessionLocal, engine
 from app.models import Base, Meal
-from app.routers import meals, system
+from app.routers import auth, meals, system
 from app.settings import settings
 
 logging.basicConfig(
@@ -75,4 +75,5 @@ def _seed_meals() -> None:
         session.commit()
 
 app.include_router(system.router, prefix="/api/v1")
+app.include_router(auth.router, prefix="/api/v1")
 app.include_router(meals.router, prefix="/api/v1")

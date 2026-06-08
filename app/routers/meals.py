@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.auth import get_current_admin
 from app.db import get_db
 from app.models import Meal, MealCreate, MealOut, MealUpdate
 
@@ -24,7 +25,11 @@ def get_meals(
 
 
 @router.post("/", response_model=MealOut, status_code=status.HTTP_201_CREATED)
-def create_meal(meal: MealCreate, db: Session = Depends(get_db)) -> Meal:
+def create_meal(
+    meal: MealCreate,
+    db: Session = Depends(get_db),
+    _: str = Depends(get_current_admin),
+) -> Meal:
     new_meal = Meal(
         name=meal.name,
         price=meal.price,
@@ -51,6 +56,7 @@ def update_meal(
     meal_id: int,
     payload: MealUpdate,
     db: Session = Depends(get_db),
+    _: str = Depends(get_current_admin),
 ) -> Meal:
     meal = db.get(Meal, meal_id)
     if meal is None:
@@ -70,7 +76,11 @@ def update_meal(
 
 
 @router.delete("/{meal_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_meal(meal_id: int, db: Session = Depends(get_db)) -> Response:
+def delete_meal(
+    meal_id: int,
+    db: Session = Depends(get_db),
+    _: str = Depends(get_current_admin),
+) -> Response:
     meal = db.get(Meal, meal_id)
     if meal is None:
         raise HTTPException(status_code=404, detail="Meal not found")

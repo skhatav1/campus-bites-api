@@ -13,6 +13,14 @@ const state = {
   plan: readStoredIds("campus-bites-plan"),
 };
 
+// ── Auth state ────────────────────────────────────────────────────────────────
+
+const auth = {
+  get token() { return localStorage.getItem("campus-bites-token"); },
+  set token(t) { t ? localStorage.setItem("campus-bites-token", t) : localStorage.removeItem("campus-bites-token"); },
+  get isLoggedIn() { return Boolean(this.token); },
+};
+
 const el = {
   apiStatus:       document.querySelector("#apiStatus"),
   refreshButton:   document.querySelector("#refreshButton"),
@@ -50,6 +58,15 @@ const el = {
   confirmOk:       document.querySelector("#confirmOk"),
   confirmCancel:   document.querySelector("#confirmCancel"),
   toastContainer:  document.querySelector("#toastContainer"),
+  loginOverlay:    document.querySelector("#loginOverlay"),
+  loginForm:       document.querySelector("#loginForm"),
+  loginUsername:   document.querySelector("#loginUsername"),
+  loginPassword:   document.querySelector("#loginPassword"),
+  loginError:      document.querySelector("#loginError"),
+  loginSubmit:     document.querySelector("#loginSubmit"),
+  loginCancel:     document.querySelector("#loginCancel"),
+  logoutButton:    document.querySelector("#logoutButton"),
+  adminBadge:      document.querySelector("#adminBadge"),
 };
 
 el.apiBaseUrl.value = state.apiBaseUrl;
@@ -91,7 +108,20 @@ el.resetApiButton.addEventListener("click", () => {
 el.cancelEditButton.addEventListener("click", resetForm);
 
 el.adminTools.addEventListener("toggle", () => {
+  if (el.adminTools.open && !auth.isLoggedIn) {
+    el.adminTools.open = false;
+    showLoginModal();
+    return;
+  }
   document.body.classList.toggle("admin-mode", el.adminTools.open);
+});
+
+el.loginForm.addEventListener("submit", submitLogin);
+el.loginCancel.addEventListener("click", () => { el.loginOverlay.hidden = true; });
+el.logoutButton.addEventListener("click", logout);
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !el.loginOverlay.hidden) el.loginOverlay.hidden = true;
 });
 
 el.clearPlanButton.addEventListener("click", () => {
@@ -112,6 +142,7 @@ document.addEventListener("keydown", (e) => {
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 
+updateAdminUI();
 loadMeals();
 
 // ── Data loading ─────────────────────────────────────────────────────────────
@@ -175,11 +206,12 @@ async function submitMeal(event) {
       apiPath(isEditing ? `/api/v1/meals/${id}` : "/api/v1/meals/"),
       {
         method: isEditing ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify(payload),
       },
     );
 
+    if (response.status === 401) { handleUnauthorized(); return; }
     if (!response.ok) throw new Error(`API returned ${response.status}`);
 
     resetForm();
@@ -200,7 +232,11 @@ async function deleteMeal(meal) {
   hideAlert();
 
   try {
-    const response = await fetch(apiPath(`/api/v1/meals/${meal.id}`), { method: "DELETE" });
+    const response = await fetch(apiPath(`/api/v1/meals/${meal.id}`), {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
+    if (response.status === 401) { handleUnauthorized(); return; }
     if (!response.ok && response.status !== 204) throw new Error(`API returned ${response.status}`);
 
     state.plan = state.plan.filter((id) => id !== meal.id);
@@ -572,6 +608,80 @@ function readStoredIds(key) {
 
 function persistIds(key, ids) {
   localStorage.setItem(key, JSON.stringify([...new Set(ids)]));
+}
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+
+function showLoginModal() {
+  el.loginForm.reset();
+  el.loginError.textContent = "";
+  el.loginOverlay.hidden = false;
+  el.loginUsername.focus();
+}
+
+async function submitLogin(e) {
+  e.preventDefault();
+  el.loginError.textContent = "";
+  el.loginSubmit.disabled = true;
+  el.loginSubmit.textContent = "Logging in…";
+
+  try {
+    const res = await fetch(apiPath("/api/v1/auth/login"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: el.loginUsername.value.trim(),
+        password: el.loginPassword.value,
+      }),
+    });
+
+    if (res.status === 401) {
+      el.loginError.textContent = "Incorrect username or password.";
+      return;
+    }
+    if (!res.ok) throw new Error(`Server error ${res.status}`);
+
+    const data = await res.json();
+    auth.token = data.access_token;
+    el.loginOverlay.hidden = true;
+    el.loginForm.reset();
+    updateAdminUI();
+    el.adminTools.open = true;
+    document.body.classList.add("admin-mode");
+    toast("Logged in as admin.");
+  } catch {
+    el.loginError.textContent = "Could not connect to the server. Try again.";
+  } finally {
+    el.loginSubmit.disabled = false;
+    el.loginSubmit.textContent = "Log in";
+  }
+}
+
+function logout() {
+  auth.token = null;
+  el.adminTools.open = false;
+  document.body.classList.remove("admin-mode");
+  updateAdminUI();
+  resetForm();
+  toast("Logged out.");
+}
+
+function handleUnauthorized() {
+  auth.token = null;
+  updateAdminUI();
+  el.adminTools.open = false;
+  document.body.classList.remove("admin-mode");
+  showLoginModal();
+  toast("Session expired — please log in again.", "error");
+}
+
+function updateAdminUI() {
+  el.adminBadge.hidden = !auth.isLoggedIn;
+  el.logoutButton.hidden = !auth.isLoggedIn;
+}
+
+function authHeaders() {
+  return auth.token ? { Authorization: `Bearer ${auth.token}` } : {};
 }
 
 // ── Formatting ────────────────────────────────────────────────────────────────
