@@ -1,19 +1,31 @@
-# Python virtual environment
+# Python
 .venv/
-
-# Python cache
+venv/
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
 
 # Environment variables
 .env
 
+# SQLite database (local dev only)
+*.db
+*.sqlite3
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
 # macOS
 .DS_Store
+**/.DS_Store
 
-# VS Code
-.vscode/
-
-# SQLite database
-*.db
-
+# Editors
+.vscode/settings.json
+.idea/
+*.swp
+*.swo

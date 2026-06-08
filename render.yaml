@@ -12,4 +12,5 @@ services:
       - key: DATABASE_URL
         value: sqlite:///./campus_bites.db
       - key: CORS_ORIGINS
-        value: '["http://localhost:3000","http://127.0.0.1:3000","https://campus-bites-api.vercel.app"]'
+        sync: false   # set this in the Render dashboard; example below
+        # '["https://your-frontend.vercel.app","http://localhost:3000"]'

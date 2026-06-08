@@ -3,11 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Campus Bites helps students find affordable campus meals between classes."
-    />
+    <meta name="description" content="Campus Bites helps students find affordable campus meals between classes." />
+    <meta property="og:title" content="Campus Bites" />
+    <meta property="og:description" content="Find a meal that fits your break and your budget." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
     <title>Campus Bites</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23276749'/><text x='16' y='22' font-family='system-ui,sans-serif' font-size='16' font-weight='900' fill='white' text-anchor='middle'>CB</text></svg>" />
+
+    <!-- Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
     <link rel="preload" href="./assets/campus-dining-hero.png" as="image" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
@@ -30,7 +40,7 @@
             Checking API
           </span>
           <button class="icon-button" id="refreshButton" type="button" title="Refresh meals" aria-label="Refresh meals">
-            ↻
+            <span class="refresh-icon" aria-hidden="true">↻</span>
           </button>
         </div>
       </header>
@@ -53,15 +63,15 @@
 
         <section class="metrics" aria-label="Menu summary">
           <article>
-            <span id="mealCount">0</span>
+            <span id="mealCount">—</span>
             <p>Options today</p>
           </article>
           <article>
-            <span id="averagePrice">$0.00</span>
+            <span id="averagePrice">—</span>
             <p>Typical spend</p>
           </article>
           <article>
-            <span id="lowestPrice">$0.00</span>
+            <span id="lowestPrice">—</span>
             <p>Best budget pick</p>
           </article>
         </section>
@@ -80,27 +90,28 @@
                   <input id="searchInput" type="search" placeholder="Search meals" autocomplete="off" />
                 </label>
                 <label class="select-field" for="sortSelect">
-                  <select id="sortSelect">
+                  <select id="sortSelect" aria-label="Sort meals">
                     <option value="recommended">Recommended</option>
-                    <option value="price-asc">Price low-high</option>
-                    <option value="price-desc">Price high-low</option>
-                    <option value="name-asc">Name A-Z</option>
+                    <option value="price-asc">Price low–high</option>
+                    <option value="price-desc">Price high–low</option>
+                    <option value="name-asc">Name A–Z</option>
                   </select>
                 </label>
               </div>
             </div>
 
-            <div class="filter-chips" aria-label="Meal filters">
+            <div class="filter-chips" role="group" aria-label="Meal filters">
               <button class="chip active" type="button" data-filter="all">All</button>
               <button class="chip" type="button" data-filter="budget">Under $8</button>
-              <button class="chip" type="button" data-filter="quick">Quick bite</button>
-              <button class="chip" type="button" data-filter="hearty">Hearty</button>
+              <button class="chip" type="button" data-filter="quick">$8–$10</button>
+              <button class="chip" type="button" data-filter="hearty">Over $10</button>
               <button class="chip" type="button" data-filter="favorites">Favorites</button>
             </div>
 
             <div class="alert" id="messageBox" role="status" aria-live="polite" hidden></div>
-            <div class="menu-grid" id="menuGrid" aria-live="polite"></div>
+            <div class="menu-grid" id="menuGrid" aria-live="polite" aria-busy="true"></div>
             <div class="empty-state" id="emptyState" hidden>
+              <div class="empty-icon" aria-hidden="true">🍽️</div>
               <h3>No meals found</h3>
               <p>Try a different search, adjust the filters, or check back after the menu is updated.</p>
             </div>
@@ -129,17 +140,29 @@
                 <h2 id="controlsTitle">Meal editor</h2>
               </div>
 
-              <form id="mealForm">
+              <form id="mealForm" novalidate>
                 <input type="hidden" id="mealId" />
 
                 <label for="mealName">
                   Meal name
-                  <input id="mealName" name="name" type="text" maxlength="120" placeholder="Garden Wrap" required />
+                  <input id="mealName" name="name" type="text" maxlength="120" placeholder="Garden Wrap" required autocomplete="off" />
+                  <span class="field-error" id="mealNameError" aria-live="polite"></span>
                 </label>
 
                 <label for="mealPrice">
-                  Price
+                  Price ($)
                   <input id="mealPrice" name="price" type="number" min="0.01" step="0.01" placeholder="7.49" required />
+                  <span class="field-error" id="mealPriceError" aria-live="polite"></span>
+                </label>
+
+                <label for="mealDescription">
+                  Description <span class="field-optional">(optional)</span>
+                  <textarea id="mealDescription" name="description" maxlength="300" placeholder="A short description of the meal…" rows="3"></textarea>
+                </label>
+
+                <label for="mealCategory">
+                  Category <span class="field-optional">(optional)</span>
+                  <input id="mealCategory" name="category" type="text" maxlength="60" placeholder="Mains, Wraps, Sides…" autocomplete="off" />
                 </label>
 
                 <div class="form-actions">
@@ -168,6 +191,21 @@
       </main>
     </div>
 
+    <!-- Confirm dialog -->
+    <div class="confirm-overlay" id="confirmOverlay" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
+      <div class="confirm-dialog">
+        <h3 id="confirmTitle" class="confirm-title"></h3>
+        <p class="confirm-body"></p>
+        <div class="confirm-actions">
+          <button class="ghost-button" id="confirmCancel" type="button">Cancel</button>
+          <button class="danger-button" id="confirmOk" type="button">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast container -->
+    <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
     <template id="mealCardTemplate">
       <article class="meal-card">
         <div class="meal-card-top">
@@ -186,6 +224,16 @@
           <button class="danger-button delete-button" type="button">Delete</button>
         </div>
       </article>
+    </template>
+
+    <template id="skeletonCardTemplate">
+      <div class="meal-card skeleton-card" aria-hidden="true">
+        <div class="skeleton skeleton-badge"></div>
+        <div class="skeleton skeleton-name"></div>
+        <div class="skeleton skeleton-note"></div>
+        <div class="skeleton skeleton-note short"></div>
+        <div class="skeleton skeleton-button"></div>
+      </div>
     </template>
 
     <script src="./config.js"></script>

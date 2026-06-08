@@ -1,6 +1,9 @@
 # system.py
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from sqlalchemy import text
+
+from app.db import engine
 
 router = APIRouter()
 
@@ -12,9 +15,9 @@ def root() -> dict:
 
 @router.get("/health", tags=["system"])
 def health_check() -> dict:
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"Database unavailable: {exc}") from exc
     return {"status": "ok"}
-
-
-@router.get("/greet")
-def greet(name: str = "Guest") -> dict:
-    return {"message": f"Hello {name}"}
