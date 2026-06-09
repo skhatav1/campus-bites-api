@@ -65,9 +65,9 @@ def update_meal(
         meal.name = payload.name
     if payload.price is not None:
         meal.price = payload.price
-    if payload.description is not None:
+    if "description" in payload.model_fields_set:
         meal.description = payload.description
-    if payload.category is not None:
+    if "category" in payload.model_fields_set:
         meal.category = payload.category
     db.commit()
     db.refresh(meal)
