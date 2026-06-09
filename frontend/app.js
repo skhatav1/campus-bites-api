@@ -21,6 +21,34 @@ const auth = {
   get isLoggedIn() { return Boolean(this.token); },
 };
 
+// ── Theme ─────────────────────────────────────────────────────────────────────
+
+function initTheme() {
+  const saved = localStorage.getItem("campus-bites-theme");
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDark = saved ? saved === "dark" : prefersDark;
+  applyTheme(isDark);
+}
+
+function applyTheme(dark) {
+  document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+  const icon = document.querySelector(".theme-icon");
+  if (icon) icon.textContent = dark ? "🌙" : "☀️";
+  localStorage.setItem("campus-bites-theme", dark ? "dark" : "light");
+}
+
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+  applyTheme(!isDark);
+}
+
+initTheme();
+
+// Sync with OS theme change if user hasn't set a manual preference
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+  if (!localStorage.getItem("campus-bites-theme")) applyTheme(e.matches);
+});
+
 const el = {
   apiStatus:       document.querySelector("#apiStatus"),
   refreshButton:   document.querySelector("#refreshButton"),
@@ -74,6 +102,7 @@ el.apiBaseUrl.value = state.apiBaseUrl;
 // ── Event listeners ──────────────────────────────────────────────────────────
 
 el.refreshButton.addEventListener("click", () => loadMeals());
+document.querySelector("#themeToggle").addEventListener("click", toggleTheme);
 
 el.searchInput.addEventListener("input", (e) => {
   state.query = e.target.value.trim().toLowerCase();
