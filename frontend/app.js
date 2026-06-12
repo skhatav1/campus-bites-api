@@ -254,6 +254,31 @@ async function submitMeal(event) {
   }
 }
 
+async function toggleAvailability(meal) {
+  try {
+    const response = await fetch(apiPath(`/api/v1/meals/${meal.id}/availability`), {
+      method: "PATCH",
+      headers: authHeaders(),
+    });
+    if (response.status === 401) { handleUnauthorized(); return; }
+    if (!response.ok) throw new Error(`API returned ${response.status}`);
+
+    const updated = await response.json();
+    state.meals = state.meals.map((m) => (m.id === updated.id ? updated : m));
+
+    // remove sold-out meals from plan
+    if (!updated.available) {
+      state.plan = state.plan.filter((id) => id !== updated.id);
+      persistIds("campus-bites-plan", state.plan);
+    }
+
+    render();
+    toast(updated.available ? `${updated.name} is now available.` : `${updated.name} marked as sold out.`);
+  } catch {
+    showAlert("Could not update availability. Check the backend connection.", "error");
+  }
+}
+
 async function deleteMeal(meal) {
   const confirmed = await confirm(`Delete "${meal.name}"?`, "This action cannot be undone.");
   if (!confirmed) return;
@@ -330,7 +355,17 @@ function renderMeals() {
     const favorite = state.favorites.includes(meal.id);
     const inPlan = state.plan.includes(meal.id);
 
-    card.querySelector(".meal-badge").textContent = mealBadge(meal);
+    // Sold out state
+    if (!meal.available) {
+      card.classList.add("sold-out");
+      const soldBadge = document.createElement("span");
+      soldBadge.className = "sold-out-badge";
+      soldBadge.textContent = "Sold out";
+      card.querySelector(".meal-card-top").prepend(soldBadge);
+    } else {
+      card.querySelector(".meal-badge").textContent = mealBadge(meal);
+    }
+
     card.querySelector(".meal-name").textContent = meal.name;
     card.querySelector(".meal-price").textContent = formatCurrency(meal.price);
     card.querySelector(".meal-note").textContent = meal.description || mealNote(meal);
@@ -338,7 +373,7 @@ function renderMeals() {
 
     const planButton = card.querySelector(".add-plan-button");
     planButton.textContent = inPlan ? "In picks" : "Add to picks";
-    planButton.disabled = inPlan;
+    planButton.disabled = inPlan || !meal.available;
     planButton.setAttribute("aria-pressed", String(inPlan));
     planButton.addEventListener("click", () => addToPlan(meal));
 
@@ -350,6 +385,11 @@ function renderMeals() {
 
     card.querySelector(".edit-button").addEventListener("click", () => editMeal(meal));
     card.querySelector(".delete-button").addEventListener("click", () => deleteMeal(meal));
+
+    const toggleBtn = card.querySelector(".toggle-button");
+    toggleBtn.textContent = meal.available ? "Mark sold out" : "Mark available";
+    toggleBtn.classList.toggle("is-available", meal.available);
+    toggleBtn.addEventListener("click", () => toggleAvailability(meal));
 
     el.menuGrid.append(card);
   });

@@ -17,6 +17,7 @@ class Meal(Base):
     price: Mapped[float] = mapped_column(Float, nullable=False)
     description: Mapped[str | None] = mapped_column(String, nullable=True)
     category: Mapped[str | None] = mapped_column(String, nullable=True)
+    available: Mapped[bool] = mapped_column(default=True, server_default="1")
 
 
 class MealCreate(BaseModel):
@@ -39,5 +40,6 @@ class MealOut(BaseModel):
     price: float
     description: str | None = None
     category: str | None = None
+    available: bool = True
 
     model_config = ConfigDict(from_attributes=True)

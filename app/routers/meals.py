@@ -75,6 +75,22 @@ def update_meal(
     return meal
 
 
+@router.patch("/{meal_id}/availability", response_model=MealOut)
+def toggle_availability(
+    meal_id: int,
+    db: Session = Depends(get_db),
+    _: str = Depends(get_current_admin),
+) -> Meal:
+    meal = db.get(Meal, meal_id)
+    if meal is None:
+        raise HTTPException(status_code=404, detail="Meal not found")
+    meal.available = not meal.available
+    db.commit()
+    db.refresh(meal)
+    logger.info("Toggled availability meal id=%s available=%s", meal_id, meal.available)
+    return meal
+
+
 @router.delete("/{meal_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_meal(
     meal_id: int,
