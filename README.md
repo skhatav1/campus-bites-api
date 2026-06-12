@@ -1,5 +1,7 @@
 # Campus Bites
 
+![CI](https://github.com/skhatav1/campus-bites-api/actions/workflows/ci.yml/badge.svg)
+
 A student-facing campus dining app — browse the current menu, save favorites, compare prices, and build a quick meal plan before leaving class.
 
 ## Features
